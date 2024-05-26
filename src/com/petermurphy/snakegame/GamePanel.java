@@ -19,12 +19,14 @@ public class GamePanel extends JPanel implements ActionListener {
     private final int backgroundHeight = 600;
     private final int pixelSize = 10;
     private final int maxSnakePixels = 3600;
-    private final int randomPos = 59;
     private final int updateDelay = 140;
-
     private int snakePixels;
+    private final int infoAreaHeight = 60;
 
-    // Current snake pixel positions.
+    private final int randomPos = (backgroundHeight - infoAreaHeight) / pixelSize;
+
+    private int level = 1;
+
     private final int[] snakeXPositions = new int[maxSnakePixels];
     private final int[] snakeYPositions = new int[maxSnakePixels];
 
@@ -96,6 +98,18 @@ public class GamePanel extends JPanel implements ActionListener {
                 g.fillRect(snakeXPositions[z], snakeYPositions[z], pixelSize, pixelSize);
             }
 
+            // Draw the game info area.
+            g.setColor(Color.gray);
+            g.fillRect(0, 0, backgroundWidth, infoAreaHeight);
+
+            // Display game info.
+            g.setColor(Color.white);
+            g.setFont(new Font("Helvetica", Font.BOLD, 14));
+            g.drawString("Level: " + level, 10, 15);
+            g.drawString("Delay: " + updateDelay + " ms", 10, 30);
+            int snakeSpeed = 1000 / updateDelay;
+            g.drawString("Speed: " + snakeSpeed + " pixels/second", 10, 45);
+
             // Ensure all drawing and graphics operations are completed before the method is returned.
             Toolkit.getDefaultToolkit().sync();
 
@@ -117,6 +131,7 @@ public class GamePanel extends JPanel implements ActionListener {
     private void checkApple() {
         if ((snakeXPositions[0] == appleXPos) && (snakeYPositions[0] == appleYPos)) {
             snakePixels++;
+            level++;
             locateApple();
             locateStPat();
         }
@@ -165,7 +180,7 @@ public class GamePanel extends JPanel implements ActionListener {
         if (snakeYPositions[0] >= backgroundHeight) {
             gameOn = false;
         }
-        if (snakeYPositions[0] < 0) {
+        if (snakeYPositions[0] < infoAreaHeight) {
             gameOn = false;
         }
         if (snakeXPositions[0] >= backgroundWidth) {
@@ -185,16 +200,16 @@ public class GamePanel extends JPanel implements ActionListener {
         stPatXPos = r * (backgroundWidth / randomPos);
 
         r = (int) (Math.random() * randomPos);
-        stPatYPos = r * (backgroundHeight / randomPos);
+        stPatYPos = r * (backgroundHeight / randomPos) + infoAreaHeight;
     }
 
 
     private void locateApple() {
         int r = (int) (Math.random() * randomPos);
-        appleXPos = r * (backgroundWidth / randomPos);
+        appleXPos = r * pixelSize;
 
         r = (int) (Math.random() * randomPos);
-        appleYPos = (backgroundHeight / randomPos);
+        appleYPos = r * (backgroundHeight / randomPos) + infoAreaHeight;
     }
 
     @Override
