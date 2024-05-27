@@ -1,11 +1,6 @@
 package com.petermurphy.snakegame;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -15,26 +10,25 @@ import javax.swing.Timer;
 
 public class GamePanel extends JPanel implements ActionListener {
 
-    private final int backgroundWidth =600;
-    private final int backgroundHeight = 600;
-    private final int pixelSize = 10;
-    private final int maxSnakePixels = 3600;
-    private final int updateDelay = 140;
-    private int snakePixels;
-    private final int infoAreaHeight = 60;
+    private static final int BACKGROUND_WIDTH = 600;
+    private static final int INFO_HEIGHT = 60;
+    private static final int BACKGROUND_HEIGHT = BACKGROUND_WIDTH + INFO_HEIGHT;
+    private static final int PIXEL_SIZE = 10;
+    private static final int MAX_SNAKE_PIXELS = 3600;
+    private static final int UPDATE_DELAY = 100;
+    private static final int RANDOM_POS = (BACKGROUND_HEIGHT - INFO_HEIGHT) / PIXEL_SIZE;
 
-    private final int randomPos = (backgroundHeight - infoAreaHeight) / pixelSize;
-
+    private static int snakePixels;
     private int level = 1;
 
-    private final int[] snakeXPositions = new int[maxSnakePixels];
-    private final int[] snakeYPositions = new int[maxSnakePixels];
-
+    private final int[] snakeXPositions = new int[MAX_SNAKE_PIXELS];
+    private final int[] snakeYPositions = new int[MAX_SNAKE_PIXELS];
     private int appleXPos;
     private int appleYPos;
-
     private int stPatXPos;
     private int stPatYPos;
+
+    private Polygon irelandShape;
 
     private boolean leftMove = false;
     private boolean rightMove = true;
@@ -50,10 +44,10 @@ public class GamePanel extends JPanel implements ActionListener {
 
     private void initBoard() {
         addKeyListener(new TAdapter());
-        setBackground(Color.lightGray);
+        setBackground(Color.cyan);
         setFocusable(true);
-
-        setPreferredSize(new Dimension(backgroundWidth, backgroundHeight));
+        irelandShape = IrelandPolygon.getIrelandPolygon();
+        setPreferredSize(new Dimension(BACKGROUND_WIDTH, BACKGROUND_HEIGHT));
         initGame();
     }
 
@@ -62,13 +56,13 @@ public class GamePanel extends JPanel implements ActionListener {
 
         for (int z = 0; z < snakePixels; z++) {
             snakeXPositions[z] = 50 - z * 10;
-            snakeYPositions[z] = (backgroundHeight - infoAreaHeight) / 2;
+            snakeYPositions[z] = (BACKGROUND_HEIGHT - INFO_HEIGHT) / 2;
         }
 
         locateApple();
         locateStPat();
 
-        timer = new Timer(updateDelay, this);
+        timer = new Timer(UPDATE_DELAY, this);
         timer.start();
     }
 
@@ -80,34 +74,39 @@ public class GamePanel extends JPanel implements ActionListener {
 
     private void doDrawing(Graphics g) {
         if (gameOn) {
+            // Draw Ireland shape
+            g.setColor(Color.green);
+            //g.drawPolygon(irelandShape);
+            g.fillPolygon(irelandShape);
+
             // Draw the apple.
             g.setColor(Color.red);
-            g.fillRect(appleXPos, appleYPos, pixelSize, pixelSize);
+            g.fillRect(appleXPos, appleYPos, PIXEL_SIZE, PIXEL_SIZE);
 
             // Draw St Patrick.
             g.setColor(Color.blue);
-            g.fillRect(stPatXPos, stPatYPos, pixelSize, pixelSize);
+            g.fillRect(stPatXPos, stPatYPos, PIXEL_SIZE, PIXEL_SIZE);
 
             // Draw the snake.
             for (int z = 0; z < snakePixels; z++) {
                 if (z == 0) {
-                    g.setColor(Color.green); // Snake's head
+                    g.setColor(Color.pink); // Snake's head
                 } else {
-                    g.setColor(Color.white); // Snake's body
+                    g.setColor(Color.magenta); // Snake's body
                 }
-                g.fillRect(snakeXPositions[z], snakeYPositions[z], pixelSize, pixelSize);
+                g.fillRect(snakeXPositions[z], snakeYPositions[z], PIXEL_SIZE, PIXEL_SIZE);
             }
 
             // Draw the game info area.
             g.setColor(Color.gray);
-            g.fillRect(0, 0, backgroundWidth, infoAreaHeight);
+            g.fillRect(0, 0, BACKGROUND_WIDTH, INFO_HEIGHT);
 
             // Display game info.
             g.setColor(Color.white);
             g.setFont(new Font("Helvetica", Font.BOLD, 14));
             g.drawString("Level: " + level, 10, 15);
-            g.drawString("Delay: " + updateDelay + " ms", 10, 30);
-            int snakeSpeed = 1000 / updateDelay;
+            g.drawString("Delay: " + UPDATE_DELAY + " ms", 10, 30);
+            int snakeSpeed = 1000 / UPDATE_DELAY;
             g.drawString("Speed: " + snakeSpeed + " pixels/second", 10, 45);
 
             // Ensure all drawing and graphics operations are completed before the method is returned.
@@ -125,7 +124,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
         g.setColor(Color.white);
         g.setFont(small);
-        g.drawString(msg, (backgroundWidth - metr.stringWidth(msg)) / 2, backgroundHeight / 2);
+        g.drawString(msg, (BACKGROUND_WIDTH - metr.stringWidth(msg)) / 2, BACKGROUND_HEIGHT / 2);
     }
 
     private void checkApple() {
@@ -152,19 +151,19 @@ public class GamePanel extends JPanel implements ActionListener {
         }
 
         if (leftMove) {
-            snakeXPositions[0] -= pixelSize;
+            snakeXPositions[0] -= PIXEL_SIZE;
         }
 
         if (rightMove) {
-            snakeXPositions[0] += pixelSize;
+            snakeXPositions[0] += PIXEL_SIZE;
         }
 
         if (upMove) {
-            snakeYPositions[0] -= pixelSize;
+            snakeYPositions[0] -= PIXEL_SIZE;
         }
 
         if (downMove) {
-            snakeYPositions[0] += pixelSize;
+            snakeYPositions[0] += PIXEL_SIZE;
         }
     }
 
@@ -177,16 +176,19 @@ public class GamePanel extends JPanel implements ActionListener {
             }
         }
 
-        if (snakeYPositions[0] >= backgroundHeight) {
+        if (snakeYPositions[0] >= BACKGROUND_HEIGHT) {
             gameOn = false;
         }
-        if (snakeYPositions[0] < infoAreaHeight) {
+        if (snakeYPositions[0] < INFO_HEIGHT) {
             gameOn = false;
         }
-        if (snakeXPositions[0] >= backgroundWidth) {
+        if (snakeXPositions[0] >= BACKGROUND_WIDTH) {
             gameOn = false;
         }
         if (snakeXPositions[0] < 0) {
+            gameOn = false;
+        }
+        if (!irelandShape.contains(snakeXPositions[0], snakeYPositions[0])) {
             gameOn = false;
         }
 
@@ -196,20 +198,24 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     private void locateStPat() {
-        int r = (int) (Math.random() * randomPos);
-        stPatXPos = r * pixelSize;
+        do {
+            int r = (int) (Math.random() * RANDOM_POS);
+            stPatXPos = r * PIXEL_SIZE;
 
-        r = (int) (Math.random() * randomPos);
-        stPatYPos = r * pixelSize + infoAreaHeight;
+            r = (int) (Math.random() * RANDOM_POS);
+            stPatYPos = r * PIXEL_SIZE + INFO_HEIGHT;
+        } while (!irelandShape.contains(stPatXPos, stPatYPos));
     }
 
 
     private void locateApple() {
-        int r = (int) (Math.random() * randomPos);
-        appleXPos = r * pixelSize;
+        do {
+            int r = (int) (Math.random() * RANDOM_POS);
+            appleXPos = r * PIXEL_SIZE;
 
-        r = (int) (Math.random() * randomPos);
-        appleYPos = r * pixelSize + infoAreaHeight;
+            r = (int) (Math.random() * RANDOM_POS);
+            appleYPos = r * PIXEL_SIZE + INFO_HEIGHT;
+        } while (!irelandShape.contains(appleXPos, appleYPos));
     }
 
     @Override
