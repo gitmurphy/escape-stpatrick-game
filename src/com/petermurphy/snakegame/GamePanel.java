@@ -62,7 +62,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
         for (int z = 0; z < snakePixels; z++) {
             snakeXPositions[z] = 50 - z * 10;
-            snakeYPositions[z] = 50;
+            snakeYPositions[z] = (backgroundHeight - infoAreaHeight) / 2;
         }
 
         locateApple();
@@ -168,7 +168,7 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
-    // Check collision with game boundaries
+    // Check collision with game boundaries.
     private void checkCollision() {
         for (int z = snakePixels; z > 0; z--) {
 
@@ -197,10 +197,10 @@ public class GamePanel extends JPanel implements ActionListener {
 
     private void locateStPat() {
         int r = (int) (Math.random() * randomPos);
-        stPatXPos = r * (backgroundWidth / randomPos);
+        stPatXPos = r * pixelSize;
 
         r = (int) (Math.random() * randomPos);
-        stPatYPos = r * (backgroundHeight / randomPos) + infoAreaHeight;
+        stPatYPos = r * pixelSize + infoAreaHeight;
     }
 
 
@@ -209,7 +209,7 @@ public class GamePanel extends JPanel implements ActionListener {
         appleXPos = r * pixelSize;
 
         r = (int) (Math.random() * randomPos);
-        appleYPos = r * (backgroundHeight / randomPos) + infoAreaHeight;
+        appleYPos = r * pixelSize + infoAreaHeight;
     }
 
     @Override
